@@ -2,29 +2,30 @@ package main
 
 import (
 	"fmt"
+	"runtime"
 	"sync"
 	"time"
 )
 
 type Account struct {
 	balance int64
-	mut     *sync.Mutex
+	sync.Mutex
 }
 
 func addBalance(account *Account, wg *sync.WaitGroup, now time.Time) {
 	defer wg.Done()
-	account.mut.Lock()
+	account.Lock()
 	account.balance += 100
 	fmt.Println("ADD     : \t", account.balance, "\t", time.Since(now).Microseconds(), "ms")
-	account.mut.Unlock()
+	account.Unlock()
 }
 
 func deductBalance(account *Account, wg *sync.WaitGroup, now time.Time) {
 	defer wg.Done()
-	account.mut.Lock()
+	account.Lock()
 	account.balance -= 100
 	fmt.Println("DEDUCT  : \t", account.balance, "\t", time.Since(now).Microseconds(), "ms")
-	account.mut.Unlock()
+	account.Unlock()
 }
 
 func main() {
@@ -32,10 +33,10 @@ func main() {
 
 	account := Account{
 		balance: 1000,
-		mut:     &sync.Mutex{},
+		Mutex:   sync.Mutex{},
 	}
 
-	fmt.Println("INITIAL : \t", account.balance, "\t", time.Since(now).Microseconds(), "ms")
+	fmt.Println("INITIAL : \t", account.balance, "\t", time.Since(now).Microseconds(), "ms - with ", runtime.NumCPU(), " cpu")
 
 	wg := sync.WaitGroup{}
 
